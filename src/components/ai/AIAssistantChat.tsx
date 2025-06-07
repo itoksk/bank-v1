@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Loader, BookOpen, Target, Lightbulb } from 'lucide-react';
+import { Send, Bot, User, Loader, BookOpen, Target, Lightbulb, ExternalLink } from 'lucide-react';
 import { AIAssistant, ChatMessage, ChatSession } from '../../types/ai';
 import { Material } from '../../types/material';
 import { sendChatMessage, createChatSession } from '../../services/aiService';
@@ -27,27 +27,75 @@ const AIAssistantChat: React.FC<AIAssistantChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
+  // 学校種を判定する関数
+  const determineSchoolLevel = (grade: string): 'elementary' | 'junior-high' | 'high-school' | 'special-needs' => {
+    if (grade.includes('elementary') || grade.includes('小学')) {
+      return 'elementary';
+    } else if (grade.includes('junior-high') || grade.includes('中学')) {
+      return 'junior-high';
+    } else if (grade.includes('high-school') || grade.includes('高校') || grade.includes('高等学校')) {
+      return 'high-school';
+    } else if (grade.includes('special') || grade.includes('特別支援')) {
+      return 'special-needs';
+    }
+    return 'junior-high';
+  };
+
+  // 学習指導要領PDFのURLを取得
+  const getCurriculumPdfUrl = (schoolLevel: 'elementary' | 'junior-high' | 'high-school' | 'special-needs'): string => {
+    const pdfUrls = {
+      'elementary': 'https://www.mext.go.jp/content/20230120-mxt_kyoiku02-100002604_01.pdf',
+      'junior-high': 'https://www.mext.go.jp/content/20230120-mxt_kyoiku02-100002604_02.pdf',
+      'high-school': 'https://www.mext.go.jp/content/20230120-mxt_kyoiku02-100002604_03.pdf',
+      'special-needs': 'https://www.mext.go.jp/a_menu/shotou/tokubetu/main/1386427.htm'
+    };
+    return pdfUrls[schoolLevel];
+  };
+
+  const schoolLevel = determineSchoolLevel(material.grade);
+  const curriculumPdfUrl = getCurriculumPdfUrl(schoolLevel);
+  const schoolLevelName = {
+    'elementary': '小学校',
+    'junior-high': '中学校', 
+    'high-school': '高等学校',
+    'special-needs': '特別支援学校'
+  }[schoolLevel];
+
   useEffect(() => {
     const initializeChat = async () => {
       try {
         const newSession = await createChatSession(material.id, assistant.id);
         setSession(newSession);
         
-        // Add welcome message with educational context
+        // Add welcome message with educational context including curriculum info
         const welcomeMessage: ChatMessage = {
           id: `welcome-${Date.now()}`,
           role: 'assistant',
           content: `こんにちは！私は${assistant.name}です。
 
-「${material.title}」について、学習指導要領に基づいた教育的サポートを提供します。
+「${material.title}」について、${schoolLevelName}学習指導要領に基づいた教育的サポートを提供します。
 
-📚 **この教材の学習目標**
-${assistant.educationalGuidelines.learningObjectives.slice(0, 2).map(obj => `• ${obj}`).join('\n')}
+📚 **教材情報**
+• 教科: ${material.subject}
+• 学年: ${material.grade}
+• 授業時間: ${material.duration}分
+• 難易度: ${material.difficulty}/5
 
-🎯 **指導方針**
-${assistant.educationalGuidelines.teachingMethods.slice(0, 3).join('、')}を重視した指導を行います。
+🎯 **学習指導要領準拠**
+${schoolLevelName}学習指導要領を自動読み込みし、以下の観点で指導します：
+• 知識・技能の習得
+• 思考・判断・表現力の育成
+• 主体的に学習に取り組む態度の養成
 
-何でもお気軽に質問してください。理解を深めるお手伝いをします！`,
+📖 **参照資料**
+学習指導要領: ${curriculumPdfUrl}
+
+${material.lessonFlow ? `
+📋 **この教材の授業の流れ**
+${material.lessonFlow.map((phase, index) => `${index + 1}. ${phase.name} (${phase.duration}分)`).join('\n')}
+` : ''}
+
+何でもお気軽に質問してください。教材の内容と学習指導要領に基づいて、理解を深めるお手伝いをします！`,
           timestamp: new Date().toISOString(),
           materialContext: {
             materialId: material.id
@@ -125,7 +173,8 @@ ${assistant.educationalGuidelines.teachingMethods.slice(0, 3).join('、')}を重
         <div className="text-center">
           <Loader className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600">AIアシスタントを準備中...</p>
-          <p className="text-sm text-gray-500 mt-2">学習指導要領を読み込んでいます...</p>
+          <p className="text-sm text-gray-500 mt-2">{schoolLevelName}学習指導要領を読み込んでいます...</p>
+          <p className="text-xs text-gray-400 mt-1">教材詳細を解析中...</p>
         </div>
       </div>
     );
@@ -141,7 +190,7 @@ ${assistant.educationalGuidelines.teachingMethods.slice(0, 3).join('、')}を重
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">{assistant.name}</h3>
-            <p className="text-sm text-gray-500">学習指導要領対応</p>
+            <p className="text-sm text-gray-500">{schoolLevelName}学習指導要領対応</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -170,22 +219,35 @@ ${assistant.educationalGuidelines.teachingMethods.slice(0, 3).join('、')}を重
             <div>
               <div className="flex items-center gap-2 font-medium text-blue-900 mb-1">
                 <Target className="h-4 w-4" />
-                学習目標
+                教材情報
               </div>
-              <ul className="text-blue-800 space-y-1">
-                {assistant.educationalGuidelines.learningObjectives.slice(0, 2).map((obj, index) => (
-                  <li key={index} className="text-xs">• {obj}</li>
-                ))}
-              </ul>
+              <div className="text-blue-800 space-y-1 text-xs">
+                <p>• 教科: {material.subject} | 学年: {material.grade}</p>
+                <p>• 授業時間: {material.duration}分 | 難易度: {material.difficulty}/5</p>
+                {material.preparationItems && material.preparationItems.length > 0 && (
+                  <p>• 準備物: {material.preparationItems.slice(0, 2).join('、')}など</p>
+                )}
+              </div>
             </div>
+            
             <div>
               <div className="flex items-center gap-2 font-medium text-blue-900 mb-1">
                 <Lightbulb className="h-4 w-4" />
-                指導方法
+                学習指導要領
               </div>
-              <p className="text-blue-800 text-xs">
-                {assistant.educationalGuidelines.teachingMethods.slice(0, 3).join('、')}
-              </p>
+              <div className="text-blue-800 text-xs space-y-1">
+                <p>• 対象: {schoolLevelName}</p>
+                <p>• 指導方法: {assistant.educationalGuidelines.teachingMethods.slice(0, 2).join('、')}</p>
+                <a 
+                  href={curriculumPdfUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 underline"
+                >
+                  学習指導要領PDF
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -252,7 +314,7 @@ ${assistant.educationalGuidelines.teachingMethods.slice(0, 3).join('、')}を重
             <div className="bg-gray-100 px-4 py-2 rounded-lg">
               <div className="flex items-center gap-2">
                 <Loader className="h-4 w-4 animate-spin text-gray-500" />
-                <span className="text-sm text-gray-500">学習指導要領を参照して回答中...</span>
+                <span className="text-sm text-gray-500">{schoolLevelName}学習指導要領と教材詳細を参照して回答中...</span>
               </div>
             </div>
           </div>
@@ -281,7 +343,7 @@ ${assistant.educationalGuidelines.teachingMethods.slice(0, 3).join('、')}を重
           </button>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          学習指導要領に基づいた教育的サポートを提供します
+          {schoolLevelName}学習指導要領と教材詳細に基づいた教育的サポートを提供します
         </p>
       </form>
     </div>

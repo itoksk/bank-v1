@@ -1,8 +1,34 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Mail, Twitter, Instagram } from 'lucide-react';
+import { BookOpen, Mail, MessageCircle, Facebook, Instagram } from 'lucide-react';
 
 const Footer: React.FC = () => {
+  // Social media sharing functions
+  const shareOnX = () => {
+    const text = '教材バンクで質の高い教育コンテンツを発見しました！';
+    const url = window.location.origin;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+  };
+
+  const shareOnInstagram = () => {
+    // Instagram doesn't support direct URL sharing, so we'll open Instagram
+    window.open('https://www.instagram.com/', '_blank');
+  };
+
+  const shareOnThreads = () => {
+    const text = '教材バンクで質の高い教育コンテンツを発見しました！';
+    const url = window.location.origin;
+    const threadsUrl = `https://threads.net/intent/post?text=${encodeURIComponent(text + ' ' + url)}`;
+    window.open(threadsUrl, '_blank', 'width=600,height=400');
+  };
+
+  const shareOnFacebook = () => {
+    const url = window.location.origin;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+  };
+
   return (
     <footer className="bg-gray-900 text-white pt-12 pb-8">
       <div className="container mx-auto px-4">
@@ -17,15 +43,36 @@ const Footer: React.FC = () => {
               教育の力で未来を創る。
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <button
+                onClick={shareOnX}
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+                title="Xでシェア"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </button>
+              <button
+                onClick={shareOnInstagram}
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+                title="Instagramで投稿"
+              >
                 <Instagram className="h-5 w-5" />
-              </a>
-              <a href="mailto:info@kyozai-bank.example.com" className="text-gray-400 hover:text-blue-400 transition-colors">
-                <Mail className="h-5 w-5" />
-              </a>
+              </button>
+              <button
+                onClick={shareOnThreads}
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+                title="Threadsでシェア"
+              >
+                <MessageCircle className="h-5 w-5" />
+              </button>
+              <button
+                onClick={shareOnFacebook}
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+                title="Facebookでシェア"
+              >
+                <Facebook className="h-5 w-5" />
+              </button>
             </div>
           </div>
           
