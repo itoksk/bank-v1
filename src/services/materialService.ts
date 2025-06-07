@@ -37,27 +37,46 @@ export const fetchPopularMaterials = async (params: MaterialSearchParams): Promi
       }
       
       if (params.grade && params.grade !== 'all') {
-        // 日本語の学年名でフィルタリング
-        const gradeMap: { [key: string]: string } = {
-          'elementary': '小学校',
-          'elementary-1': '小学1年生',
-          'elementary-2': '小学2年生',
-          'elementary-3': '小学3年生',
-          'elementary-4': '小学4年生',
-          'elementary-5': '小学5年生',
-          'elementary-6': '小学6年生',
-          'junior-high': '中学校',
-          'junior-high-1': '中学1年生',
-          'junior-high-2': '中学2年生',
-          'junior-high-3': '中学3年生',
-          'high-school': '高等学校',
-          'high-school-1': '高校1年生',
-          'high-school-2': '高校2年生',
-          'high-school-3': '高校3年生'
-        };
-        
-        const japaneseGrade = gradeMap[params.grade] || params.grade;
-        filteredMaterials = filteredMaterials.filter(m => m.grade === japaneseGrade);
+        // 学校種別での包括的フィルタリング
+        if (params.grade === 'elementary') {
+          // 小学校の場合：小学1年生〜6年生すべて
+          filteredMaterials = filteredMaterials.filter(m => 
+            m.grade === '小学1年生' || m.grade === '小学2年生' || m.grade === '小学3年生' ||
+            m.grade === '小学4年生' || m.grade === '小学5年生' || m.grade === '小学6年生' ||
+            m.grade === '小学校'
+          );
+        } else if (params.grade === 'junior-high') {
+          // 中学校の場合：中学1年生〜3年生すべて
+          filteredMaterials = filteredMaterials.filter(m => 
+            m.grade === '中学1年生' || m.grade === '中学2年生' || m.grade === '中学3年生' ||
+            m.grade === '中学校'
+          );
+        } else if (params.grade === 'high-school') {
+          // 高等学校の場合：高校1年生〜3年生すべて
+          filteredMaterials = filteredMaterials.filter(m => 
+            m.grade === '高校1年生' || m.grade === '高校2年生' || m.grade === '高校3年生' ||
+            m.grade === '高等学校'
+          );
+        } else {
+          // 具体的な学年での絞り込み
+          const gradeMap: { [key: string]: string } = {
+            'elementary-1': '小学1年生',
+            'elementary-2': '小学2年生',
+            'elementary-3': '小学3年生',
+            'elementary-4': '小学4年生',
+            'elementary-5': '小学5年生',
+            'elementary-6': '小学6年生',
+            'junior-high-1': '中学1年生',
+            'junior-high-2': '中学2年生',
+            'junior-high-3': '中学3年生',
+            'high-school-1': '高校1年生',
+            'high-school-2': '高校2年生',
+            'high-school-3': '高校3年生'
+          };
+          
+          const japaneseGrade = gradeMap[params.grade] || params.grade;
+          filteredMaterials = filteredMaterials.filter(m => m.grade === japaneseGrade);
+        }
       }
       
       if (params.subject && params.subject !== 'all') {
@@ -191,26 +210,46 @@ export const fetchLatestMaterials = async (params: MaterialSearchParams): Promis
       }
       
       if (params.grade && params.grade !== 'all') {
-        const gradeMap: { [key: string]: string } = {
-          'elementary': '小学校',
-          'elementary-1': '小学1年生',
-          'elementary-2': '小学2年生',
-          'elementary-3': '小学3年生',
-          'elementary-4': '小学4年生',
-          'elementary-5': '小学5年生',
-          'elementary-6': '小学6年生',
-          'junior-high': '中学校',
-          'junior-high-1': '中学1年生',
-          'junior-high-2': '中学2年生',
-          'junior-high-3': '中学3年生',
-          'high-school': '高等学校',
-          'high-school-1': '高校1年生',
-          'high-school-2': '高校2年生',
-          'high-school-3': '高校3年生'
-        };
-        
-        const japaneseGrade = gradeMap[params.grade] || params.grade;
-        filteredMaterials = filteredMaterials.filter(m => m.grade === japaneseGrade);
+        // 学校種別での包括的フィルタリング
+        if (params.grade === 'elementary') {
+          // 小学校の場合：小学1年生〜6年生すべて
+          filteredMaterials = filteredMaterials.filter(m => 
+            m.grade === '小学1年生' || m.grade === '小学2年生' || m.grade === '小学3年生' ||
+            m.grade === '小学4年生' || m.grade === '小学5年生' || m.grade === '小学6年生' ||
+            m.grade === '小学校'
+          );
+        } else if (params.grade === 'junior-high') {
+          // 中学校の場合：中学1年生〜3年生すべて
+          filteredMaterials = filteredMaterials.filter(m => 
+            m.grade === '中学1年生' || m.grade === '中学2年生' || m.grade === '中学3年生' ||
+            m.grade === '中学校'
+          );
+        } else if (params.grade === 'high-school') {
+          // 高等学校の場合：高校1年生〜3年生すべて
+          filteredMaterials = filteredMaterials.filter(m => 
+            m.grade === '高校1年生' || m.grade === '高校2年生' || m.grade === '高校3年生' ||
+            m.grade === '高等学校'
+          );
+        } else {
+          // 具体的な学年での絞り込み
+          const gradeMap: { [key: string]: string } = {
+            'elementary-1': '小学1年生',
+            'elementary-2': '小学2年生',
+            'elementary-3': '小学3年生',
+            'elementary-4': '小学4年生',
+            'elementary-5': '小学5年生',
+            'elementary-6': '小学6年生',
+            'junior-high-1': '中学1年生',
+            'junior-high-2': '中学2年生',
+            'junior-high-3': '中学3年生',
+            'high-school-1': '高校1年生',
+            'high-school-2': '高校2年生',
+            'high-school-3': '高校3年生'
+          };
+          
+          const japaneseGrade = gradeMap[params.grade] || params.grade;
+          filteredMaterials = filteredMaterials.filter(m => m.grade === japaneseGrade);
+        }
       }
       
       if (params.subject && params.subject !== 'all') {
