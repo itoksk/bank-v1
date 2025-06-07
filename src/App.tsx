@@ -5,6 +5,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
 import MaterialDetailPage from './pages/MaterialDetailPage';
+import MaterialForkPage from './pages/MaterialForkPage';
 import ProfilePage from './pages/ProfilePage';
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherMaterialsPage from './pages/TeacherMaterialsPage';
@@ -37,6 +38,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/material/:id" element={<MaterialDetailPage />} />
+              <Route path="/material/:id/fork" element={<MaterialForkPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/profile/:id" element={<ProfilePage />} />
               <Route path="/settings/profile" element={<ProfileSettingsPage />} />

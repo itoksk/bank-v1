@@ -244,7 +244,22 @@ export interface MaterialSearchParams {
   grade?: string;
   subject?: string;
   query?: string;
+  difficulty?: number;
+  duration?: string;
+  sortBy?: string;
   limit?: number;
   page?: number;
   author?: string;
+}
+
+export interface MaterialForkRequest {
+  originalMaterialId: string;
+  title?: string;
+  description?: string;
+  targetGrade?: string;
+  targetSubject?: string;
+  difficulty?: number;
+  duration?: number;
+  customInstructions?: string;
+  focusAreas?: string[];
 }
