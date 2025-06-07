@@ -104,14 +104,14 @@ const MaterialDetailPage: React.FC = () => {
             <span>教材一覧に戻る</span>
           </Link>
           
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col xl:flex-row gap-8">
             {/* Video Player */}
-            <div className="lg:w-7/12">
+            <div className={`${showAIChat ? 'xl:w-1/2' : 'xl:w-7/12'} transition-all duration-300`}>
               <VideoPlayer videoUrl={material.videoUrl} thumbnailUrl={material.thumbnailUrl} />
             </div>
             
             {/* Material Details */}
-            <div className="lg:w-5/12">
+            <div className={`${showAIChat ? 'xl:w-1/4' : 'xl:w-5/12'} transition-all duration-300`}>
               <div className="flex gap-2 mb-3">
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-500 text-white">
                   {material.subject}
@@ -185,11 +185,15 @@ const MaterialDetailPage: React.FC = () => {
               {/* AI Features */}
               <div className="grid grid-cols-1 gap-3 mb-6">
                 <button
-                  onClick={() => setShowAIChat(true)}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all"
+                  onClick={() => setShowAIChat(!showAIChat)}
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all ${
+                    showAIChat 
+                      ? 'bg-gradient-to-r from-blue-700 to-purple-700 text-white' 
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
+                  }`}
                 >
                   <Bot className="h-5 w-5" />
-                  <span>AIアシスタントに質問</span>
+                  <span>{showAIChat ? 'AIアシスタントを閉じる' : 'AIアシスタントに質問'}</span>
                 </button>
                 
                 <button
@@ -233,22 +237,23 @@ const MaterialDetailPage: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* AI Chat Sidebar */}
+            {showAIChat && assistant && (
+              <div className="xl:w-1/4 transition-all duration-300">
+                <div className="sticky top-24 h-[calc(100vh-8rem)]">
+                  <AIAssistantChat
+                    material={material}
+                    assistant={assistant}
+                    onClose={() => setShowAIChat(false)}
+                    isEmbedded={true}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
-      
-      {/* AI Chat Modal */}
-      {showAIChat && assistant && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-2xl">
-            <AIAssistantChat
-              material={material}
-              assistant={assistant}
-              onClose={() => setShowAIChat(false)}
-            />
-          </div>
-        </div>
-      )}
       
       {/* Material Generator Modal */}
       {showGenerator && (

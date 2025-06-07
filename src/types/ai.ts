@@ -5,7 +5,26 @@ export interface AIAssistant {
   personality: string;
   expertise: string[];
   systemPrompt: string;
+  educationalGuidelines: EducationalGuidelines;
   avatar?: string;
+}
+
+export interface EducationalGuidelines {
+  schoolLevel: 'elementary' | 'junior-high' | 'high-school' | 'special-needs';
+  subject: string;
+  gradeLevel: string;
+  learningObjectives: string[];
+  teachingMethods: string[];
+  assessmentCriteria: string[];
+  curriculumStandards: CurriculumStandard[];
+}
+
+export interface CurriculumStandard {
+  code: string;
+  title: string;
+  description: string;
+  skills: string[];
+  knowledgeAreas: string[];
 }
 
 export interface ChatMessage {
@@ -17,6 +36,12 @@ export interface ChatMessage {
     materialId: string;
     pageNumber?: number;
     section?: string;
+    curriculumAlignment?: string[];
+  };
+  educationalInsights?: {
+    learningObjective: string;
+    difficulty: number;
+    suggestedActivities: string[];
   };
 }
 
@@ -27,6 +52,12 @@ export interface ChatSession {
   messages: ChatMessage[];
   createdAt: string;
   updatedAt: string;
+  educationalContext: {
+    subject: string;
+    grade: string;
+    learningGoals: string[];
+    curriculumAlignment: string[];
+  };
 }
 
 export interface MaterialGenerationRequest {
@@ -37,6 +68,8 @@ export interface MaterialGenerationRequest {
   duration: number;
   customInstructions?: string;
   focusAreas?: string[];
+  curriculumAlignment?: string[];
+  learningObjectives?: string[];
 }
 
 export interface GeneratedMaterial {
@@ -48,4 +81,10 @@ export interface GeneratedMaterial {
   generationRequest: MaterialGenerationRequest;
   status: 'generating' | 'completed' | 'failed';
   createdAt: string;
+  educationalMetadata: {
+    curriculumAlignment: string[];
+    learningObjectives: string[];
+    assessmentMethods: string[];
+    differentiationStrategies: string[];
+  };
 }
