@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, Clock, Users, Target, BookOpen, MessageSquare, Wand2, Eye } from 'lucide-react';
+import { Save, Plus, Trash2, Clock, Users, Target, BookOpen, MessageSquare, Wand2, Eye, ArrowRight } from 'lucide-react';
 import { Material, LessonGuide, LessonPhase, Activity, LessonGoal, TeachingStrategy, MaterialDetails } from '../../types/material';
 import { generateLessonGuideFromMaterial } from '../../services/lessonGuideService';
 import toast from 'react-hot-toast';
@@ -195,7 +195,7 @@ const LessonGuideForm: React.FC<LessonGuideFormProps> = ({
               onClick={onCancel}
               className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              キャンセル
+              戻る
             </button>
           </div>
           
@@ -239,19 +239,19 @@ const LessonGuideForm: React.FC<LessonGuideFormProps> = ({
               onClick={onCancel}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              キャンセル
+              戻る
             </button>
             <button
               onClick={handleSave}
               disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-green-300"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              保存
+              完了・保存
             </button>
           </div>
         </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, BookOpen, Target, Users, Settings, Lightbulb, Shield, Zap } from 'lucide-react';
+import { Save, Plus, Trash2, BookOpen, Target, Users, Settings, Lightbulb, Shield, Zap, ArrowRight } from 'lucide-react';
 import { Material, MaterialDetails, PreparationItem, CurriculumAlignment, AssessmentCriterion, EvaluationMethod, ICTIntegration, DigitalResource } from '../../types/material';
 import { generateMaterialDetailsTemplate } from '../../services/lessonGuideService';
+import EvaluationCriteriaTable from './EvaluationCriteriaTable';
 import toast from 'react-hot-toast';
 
 interface MaterialDetailsFormProps {
@@ -116,6 +117,13 @@ const MaterialDetailsForm: React.FC<MaterialDetailsFormProps> = ({
     }));
   };
 
+  const updateAssessmentCriteria = (criteria: AssessmentCriterion[]) => {
+    setDetails(prev => ({
+      ...prev,
+      assessmentCriteria: criteria
+    }));
+  };
+
   return (
     <div className="bg-white rounded-xl border border-gray-200">
       {/* Header */}
@@ -130,7 +138,7 @@ const MaterialDetailsForm: React.FC<MaterialDetailsFormProps> = ({
               onClick={onCancel}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              キャンセル
+              戻る
             </button>
             <button
               onClick={handleSave}
@@ -140,9 +148,9 @@ const MaterialDetailsForm: React.FC<MaterialDetailsFormProps> = ({
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <Save className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" />
               )}
-              保存
+              次へ（授業ガイド作成）
             </button>
           </div>
         </div>
@@ -456,55 +464,14 @@ const MaterialDetailsForm: React.FC<MaterialDetailsFormProps> = ({
 
         {activeTab === 'assessment' && (
           <div className="space-y-6">
-            {/* Assessment Criteria */}
+            {/* Assessment Criteria Table */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">評価規準</h3>
-              <div className="space-y-4">
-                {details.assessmentCriteria.map((criterion, index) => (
-                  <div key={index} className="p-4 border border-gray-200 rounded-lg">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                      <select
-                        value={criterion.competencyArea}
-                        onChange={(e) => {
-                          const newCriteria = [...details.assessmentCriteria];
-                          newCriteria[index] = { ...criterion, competencyArea: e.target.value as any };
-                          setDetails(prev => ({ ...prev, assessmentCriteria: newCriteria }));
-                        }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="知識・技能">知識・技能</option>
-                        <option value="思考・判断・表現">思考・判断・表現</option>
-                        <option value="学びに向かう力・人間性">学びに向かう力・人間性</option>
-                      </select>
-                      <input
-                        type="text"
-                        value={criterion.criterion}
-                        onChange={(e) => {
-                          const newCriteria = [...details.assessmentCriteria];
-                          newCriteria[index] = { ...criterion, criterion: e.target.value };
-                          setDetails(prev => ({ ...prev, assessmentCriteria: newCriteria }));
-                        }}
-                        placeholder="評価規準"
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <textarea
-                      value={criterion.indicators.join('\n')}
-                      onChange={(e) => {
-                        const newCriteria = [...details.assessmentCriteria];
-                        newCriteria[index] = { 
-                          ...criterion, 
-                          indicators: e.target.value.split('\n').filter(i => i.trim()) 
-                        };
-                        setDetails(prev => ({ ...prev, assessmentCriteria: newCriteria }));
-                      }}
-                      placeholder="評価の観点を1行ずつ入力..."
-                      rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    />
-                  </div>
-                ))}
-              </div>
+              <EvaluationCriteriaTable
+                criteria={details.assessmentCriteria}
+                onChange={updateAssessmentCriteria}
+                editable={true}
+              />
             </div>
 
             {/* Evaluation Methods */}
