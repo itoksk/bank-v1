@@ -10,15 +10,81 @@ export const fetchPopularMaterials = async (params: MaterialSearchParams): Promi
       
       // Apply filters
       if (params.category && params.category !== 'all') {
-        filteredMaterials = filteredMaterials.filter(m => m.subject === params.category);
+        // 日本語の教科名でフィルタリング
+        const categoryMap: { [key: string]: string } = {
+          'math': '数学',
+          'japanese': '国語', 
+          'science': '理科',
+          'social': '社会',
+          'english': '英語',
+          'moral': '道徳',
+          'information': '情報',
+          'technology': '技術',
+          'art': '美術',
+          'music': '音楽',
+          'nursing': '看護',
+          'fishery': '水産',
+          'agriculture': '農業',
+          'industry': '工業',
+          'ict': 'ICT',
+          'ai': '生成AI',
+          'citizenship': 'デジタルシティズンシップ',
+          'other': 'その他'
+        };
+        
+        const japaneseCategory = categoryMap[params.category] || params.category;
+        filteredMaterials = filteredMaterials.filter(m => m.subject === japaneseCategory);
       }
       
       if (params.grade && params.grade !== 'all') {
-        filteredMaterials = filteredMaterials.filter(m => m.grade === params.grade);
+        // 日本語の学年名でフィルタリング
+        const gradeMap: { [key: string]: string } = {
+          'elementary': '小学校',
+          'elementary-1': '小学1年生',
+          'elementary-2': '小学2年生',
+          'elementary-3': '小学3年生',
+          'elementary-4': '小学4年生',
+          'elementary-5': '小学5年生',
+          'elementary-6': '小学6年生',
+          'junior-high': '中学校',
+          'junior-high-1': '中学1年生',
+          'junior-high-2': '中学2年生',
+          'junior-high-3': '中学3年生',
+          'high-school': '高等学校',
+          'high-school-1': '高校1年生',
+          'high-school-2': '高校2年生',
+          'high-school-3': '高校3年生'
+        };
+        
+        const japaneseGrade = gradeMap[params.grade] || params.grade;
+        filteredMaterials = filteredMaterials.filter(m => m.grade === japaneseGrade);
       }
       
       if (params.subject && params.subject !== 'all') {
-        filteredMaterials = filteredMaterials.filter(m => m.subject === params.subject);
+        // 日本語の教科名でフィルタリング（subjectパラメータ用）
+        const subjectMap: { [key: string]: string } = {
+          'math': '数学',
+          'japanese': '国語', 
+          'science': '理科',
+          'social': '社会',
+          'english': '英語',
+          'moral': '道徳',
+          'information': '情報',
+          'technology': '技術',
+          'art': '美術',
+          'music': '音楽',
+          'nursing': '看護',
+          'fishery': '水産',
+          'agriculture': '農業',
+          'industry': '工業',
+          'ict': 'ICT',
+          'ai': '生成AI',
+          'citizenship': 'デジタルシティズンシップ',
+          'other': 'その他'
+        };
+        
+        const japaneseSubject = subjectMap[params.subject] || params.subject;
+        filteredMaterials = filteredMaterials.filter(m => m.subject === japaneseSubject);
       }
 
       if (params.difficulty) {
@@ -97,17 +163,80 @@ export const fetchLatestMaterials = async (params: MaterialSearchParams): Promis
     setTimeout(() => {
       let filteredMaterials = [...mockMaterials];
       
-      // Apply filters
+      // Apply filters with Japanese mapping
       if (params.category && params.category !== 'all') {
-        filteredMaterials = filteredMaterials.filter(m => m.subject === params.category);
+        const categoryMap: { [key: string]: string } = {
+          'math': '数学',
+          'japanese': '国語', 
+          'science': '理科',
+          'social': '社会',
+          'english': '英語',
+          'moral': '道徳',
+          'information': '情報',
+          'technology': '技術',
+          'art': '美術',
+          'music': '音楽',
+          'nursing': '看護',
+          'fishery': '水産',
+          'agriculture': '農業',
+          'industry': '工業',
+          'ict': 'ICT',
+          'ai': '生成AI',
+          'citizenship': 'デジタルシティズンシップ',
+          'other': 'その他'
+        };
+        
+        const japaneseCategory = categoryMap[params.category] || params.category;
+        filteredMaterials = filteredMaterials.filter(m => m.subject === japaneseCategory);
       }
       
       if (params.grade && params.grade !== 'all') {
-        filteredMaterials = filteredMaterials.filter(m => m.grade === params.grade);
+        const gradeMap: { [key: string]: string } = {
+          'elementary': '小学校',
+          'elementary-1': '小学1年生',
+          'elementary-2': '小学2年生',
+          'elementary-3': '小学3年生',
+          'elementary-4': '小学4年生',
+          'elementary-5': '小学5年生',
+          'elementary-6': '小学6年生',
+          'junior-high': '中学校',
+          'junior-high-1': '中学1年生',
+          'junior-high-2': '中学2年生',
+          'junior-high-3': '中学3年生',
+          'high-school': '高等学校',
+          'high-school-1': '高校1年生',
+          'high-school-2': '高校2年生',
+          'high-school-3': '高校3年生'
+        };
+        
+        const japaneseGrade = gradeMap[params.grade] || params.grade;
+        filteredMaterials = filteredMaterials.filter(m => m.grade === japaneseGrade);
       }
       
       if (params.subject && params.subject !== 'all') {
-        filteredMaterials = filteredMaterials.filter(m => m.subject === params.subject);
+        const subjectMap: { [key: string]: string } = {
+          'math': '数学',
+          'japanese': '国語', 
+          'science': '理科',
+          'social': '社会',
+          'english': '英語',
+          'moral': '道徳',
+          'information': '情報',
+          'technology': '技術',
+          'art': '美術',
+          'music': '音楽',
+          'nursing': '看護',
+          'fishery': '水産',
+          'agriculture': '農業',
+          'industry': '工業',
+          'ict': 'ICT',
+          'ai': '生成AI',
+          'citizenship': 'デジタルシティズンシップ',
+          'other': 'その他'
+        };
+        
+        const japaneseSubject = subjectMap[params.subject] || params.subject;
+        filteredMaterials = filteredMaterials.filter(m => m.subject === japaneseSubject);
       }
       
       if (params.query) {

@@ -105,6 +105,52 @@ const SearchPage: React.FC = () => {
   };
 
   const activeFilterCount = getActiveFilterCount();
+
+  // Get Japanese display names for filters
+  const getCategoryDisplayName = (category: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'math': '数学',
+      'japanese': '国語', 
+      'science': '理科',
+      'social': '社会',
+      'english': '英語',
+      'moral': '道徳',
+      'information': '情報',
+      'technology': '技術',
+      'art': '美術',
+      'music': '音楽',
+      'nursing': '看護',
+      'fishery': '水産',
+      'agriculture': '農業',
+      'industry': '工業',
+      'ict': 'ICT',
+      'ai': '生成AI',
+      'citizenship': 'デジタルシティズンシップ',
+      'other': 'その他'
+    };
+    return categoryMap[category] || category;
+  };
+
+  const getGradeDisplayName = (grade: string) => {
+    const gradeMap: { [key: string]: string } = {
+      'elementary': '小学校',
+      'elementary-1': '小学1年生',
+      'elementary-2': '小学2年生',
+      'elementary-3': '小学3年生',
+      'elementary-4': '小学4年生',
+      'elementary-5': '小学5年生',
+      'elementary-6': '小学6年生',
+      'junior-high': '中学校',
+      'junior-high-1': '中学1年生',
+      'junior-high-2': '中学2年生',
+      'junior-high-3': '中学3年生',
+      'high-school': '高等学校',
+      'high-school-1': '高校1年生',
+      'high-school-2': '高校2年生',
+      'high-school-3': '高校3年生'
+    };
+    return gradeMap[grade] || grade;
+  };
   
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -298,7 +344,7 @@ const SearchPage: React.FC = () => {
                     <div className="flex flex-wrap gap-2">
                       {selectedCategory !== 'all' && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                          カテゴリ: {selectedCategory}
+                          カテゴリ: {getCategoryDisplayName(selectedCategory)}
                           <button
                             onClick={() => setSelectedCategory('all')}
                             className="text-blue-500 hover:text-blue-700"
@@ -309,7 +355,7 @@ const SearchPage: React.FC = () => {
                       )}
                       {selectedGrade !== 'all' && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                          学年: {selectedGrade}
+                          学年: {getGradeDisplayName(selectedGrade)}
                           <button
                             onClick={() => setSelectedGrade('all')}
                             className="text-blue-500 hover:text-blue-700"
@@ -320,7 +366,7 @@ const SearchPage: React.FC = () => {
                       )}
                       {selectedSubject !== 'all' && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                          教科: {selectedSubject}
+                          教科: {getCategoryDisplayName(selectedSubject)}
                           <button
                             onClick={() => setSelectedSubject('all')}
                             className="text-blue-500 hover:text-blue-700"
@@ -342,7 +388,7 @@ const SearchPage: React.FC = () => {
                       )}
                       {selectedDuration !== 'all' && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                          時間: {selectedDuration}
+                          時間: {selectedDuration === 'short' ? '短時間' : selectedDuration === 'standard' ? '標準' : '長時間'}
                           <button
                             onClick={() => setSelectedDuration('all')}
                             className="text-blue-500 hover:text-blue-700"
