@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Eye, ThumbsUp, GitFork, Clock, ArrowLeft, Download, Bookmark, 
-  BookOpen, Share2, Star, ThumbsDown, MessageSquare 
+  BookOpen, Share2, Star, ThumbsDown, MessageSquare, Bot, Sparkles 
 } from 'lucide-react';
 import { fetchMaterialById } from '../services/materialService';
+import { getAssistantBySubject } from '../services/aiService';
 import { Material } from '../types/material';
+import { AIAssistant } from '../types/ai';
 import { formatDate } from '../utils/dateUtils';
 import VideoPlayer from '../components/materials/VideoPlayer';
 import MaterialVersionHistory from '../components/materials/MaterialVersionHistory';
@@ -13,14 +15,19 @@ import MaterialRequirements from '../components/materials/MaterialRequirements';
 import MaterialLessonFlow from '../components/materials/MaterialLessonFlow';
 import RelatedMaterials from '../components/materials/RelatedMaterials';
 import MaterialComments from '../components/materials/MaterialComments';
+import AIAssistantChat from '../components/ai/AIAssistantChat';
+import MaterialGenerator from '../components/ai/MaterialGenerator';
 import Spinner from '../components/utils/Spinner';
 
 const MaterialDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [material, setMaterial] = useState<Material | null>(null);
+  const [assistant, setAssistant] = useState<AIAssistant | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'details' | 'guide' | 'comments' | 'versions'>('details');
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [showGenerator, setShowGenerator] = useState(false);
 
   useEffect(() => {
     const loadMaterial = async () => {
@@ -28,8 +35,13 @@ const MaterialDetailPage: React.FC = () => {
 
       setIsLoading(true);
       try {
-        const data = await fetchMaterialById(id);
-        setMaterial(data);
+        const [materialData, assistantData] = await Promise.all([
+          fetchMaterialById(id),
+          fetchMaterialById(id).then(m => getAssistantBySubject(m.subject))
+        ]);
+        
+        setMaterial(materialData);
+        setAssistant(assistantData);
       } catch (err) {
         console.error('Failed to fetch material', err);
         setError('教材の読み込みに失敗しました。');
@@ -170,7 +182,26 @@ const MaterialDetailPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="flex gap-3 mb-8">
+              {/* AI Features */}
+              <div className="grid grid-cols-1 gap-3 mb-6">
+                <button
+                  onClick={() => setShowAIChat(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all"
+                >
+                  <Bot className="h-5 w-5" />
+                  <span>AIアシスタントに質問</span>
+                </button>
+                
+                <button
+                  onClick={() => setShowGenerator(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  <span>この教材をベースに新しい教材を生成</span>
+                </button>
+              </div>
+              
+              <div className="flex gap-3 mb-6">
                 <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                   <Download className="h-5 w-5" />
                   <span>教材PDFダウンロード</span>
@@ -205,6 +236,31 @@ const MaterialDetailPage: React.FC = () => {
           </div>
         </div>
       </section>
+      
+      {/* AI Chat Modal */}
+      {showAIChat && assistant && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-2xl">
+            <AIAssistantChat
+              material={material}
+              assistant={assistant}
+              onClose={() => setShowAIChat(false)}
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* Material Generator Modal */}
+      {showGenerator && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <MaterialGenerator
+              baseMaterial={material}
+              onClose={() => setShowGenerator(false)}
+            />
+          </div>
+        </div>
+      )}
       
       {/* Tabs Navigation */}
       <section className="border-b border-gray-200 sticky top-16 bg-white z-20 shadow-sm">
