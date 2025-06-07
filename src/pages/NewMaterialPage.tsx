@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Upload, Plus, Trash2, Clock, Video,
-  FileText, Save, Eye, ArrowLeft, Settings, BookOpen, Wand2
+  Upload, Plus, Trash2, Clock, Video, FileText, Save, Eye, ArrowLeft, 
+  Settings, BookOpen, Wand2, FileCheck, Sparkles, Brain
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Material, MaterialDetails, LessonGuide } from '../types/material';
@@ -10,6 +10,7 @@ import CategorySelector from '../components/materials/CategorySelector';
 import GradeSelector from '../components/materials/GradeSelector';
 import MaterialDetailsForm from '../components/materials/MaterialDetailsForm';
 import LessonGuideForm from '../components/materials/LessonGuideForm';
+import { analyzePDFContent } from '../services/pdfAnalysisService';
 import toast from 'react-hot-toast';
 
 const NewMaterialPage: React.FC = () => {
@@ -27,6 +28,7 @@ const NewMaterialPage: React.FC = () => {
   const [video, setVideo] = useState<File | null>(null);
   const [pdf, setPdf] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzingPDF, setIsAnalyzingPDF] = useState(false);
 
   // Enhanced states
   const [materialDetails, setMaterialDetails] = useState<MaterialDetails | null>(null);
@@ -55,10 +57,43 @@ const NewMaterialPage: React.FC = () => {
     }
   };
 
-  const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePdfChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setPdf(file);
+      
+      // PDFから教材詳細を自動抽出
+      setIsAnalyzingPDF(true);
+      try {
+        const extractedDetails = await analyzePDFContent(file, {
+          title,
+          subject: category,
+          grade,
+          duration: parseInt(duration) || 45,
+          difficulty: parseInt(difficulty)
+        });
+        
+        // 基本情報を自動入力
+        if (extractedDetails.title && !title) {
+          setTitle(extractedDetails.title);
+        }
+        if (extractedDetails.description && !description) {
+          setDescription(extractedDetails.description);
+        }
+        if (extractedDetails.duration && !duration) {
+          setDuration(extractedDetails.duration.toString());
+        }
+        
+        // 教材詳細を設定
+        setMaterialDetails(extractedDetails.materialDetails);
+        
+        toast.success('PDFから教材詳細を自動抽出しました');
+      } catch (error) {
+        console.error('PDF analysis failed', error);
+        toast.error('PDF解析に失敗しました。手動で入力してください。');
+      } finally {
+        setIsAnalyzingPDF(false);
+      }
     }
   };
 
@@ -188,9 +223,9 @@ const NewMaterialPage: React.FC = () => {
                 3
               </div>
               <div className="ml-4 text-sm text-gray-600">
-                {activeStep === 'basic' && '基本情報'}
-                {activeStep === 'details' && '教材詳細'}
-                {activeStep === 'guide' && '授業ガイド'}
+                {activeStep === 'basic' && '基本情報・ファイルアップロード'}
+                {activeStep === 'details' && '教材詳細設定'}
+                {activeStep === 'guide' && '授業ガイド作成'}
               </div>
             </div>
           </div>
@@ -291,41 +326,68 @@ const NewMaterialPage: React.FC = () => {
                 <h2 className="text-lg font-bold text-gray-900 mb-4">メディアアップロード</h2>
                 
                 <div className="space-y-6">
-                  {/* Thumbnail Upload */}
+                  {/* PDF Upload with AI Analysis */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      サムネイル画像
+                      教材PDF <span className="text-red-500">*</span>
+                      <span className="ml-2 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                        AI自動解析対応
+                      </span>
                     </label>
                     <div className="flex items-center gap-4">
-                      <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                        {thumbnailPreview ? (
-                          <img
-                            src={thumbnailPreview}
-                            alt="Thumbnail preview"
-                            className="w-full h-full object-cover"
-                          />
+                      <div className={`w-32 h-32 rounded-lg flex items-center justify-center ${
+                        pdf ? 'bg-blue-50 border-2 border-blue-200' : 'bg-gray-100'
+                      }`}>
+                        {pdf ? (
+                          <div className="text-center">
+                            <FileCheck className="h-8 w-8 text-blue-600 mx-auto mb-1" />
+                            <div className="text-xs text-blue-600">PDF準備完了</div>
+                          </div>
                         ) : (
-                          <Upload className="h-8 w-8 text-gray-400" />
+                          <FileText className="h-8 w-8 text-gray-400" />
                         )}
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <input
                           type="file"
-                          accept="image/*"
-                          onChange={handleThumbnailChange}
+                          accept=".pdf"
+                          onChange={handlePdfChange}
                           className="hidden"
-                          id="thumbnail-upload"
+                          id="pdf-upload"
+                          required
                         />
                         <label
-                          htmlFor="thumbnail-upload"
+                          htmlFor="pdf-upload"
                           className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           <Plus className="h-5 w-5" />
-                          アップロード
+                          PDFをアップロード
                         </label>
                         <p className="text-sm text-gray-500 mt-1">
-                          推奨サイズ: 1280x720px, 最大2MB
+                          最大サイズ: 50MB
                         </p>
+                        <p className="text-xs text-blue-600 mt-1">
+                          📖 PDFから学習目標、授業展開、評価基準を自動抽出します
+                        </p>
+                        {pdf && (
+                          <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
+                            <FileText className="h-4 w-4" />
+                            {pdf.name}
+                            <button
+                              type="button"
+                              onClick={() => setPdf(null)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
+                        {isAnalyzingPDF && (
+                          <div className="flex items-center gap-2 mt-2 text-sm text-blue-600">
+                            <Brain className="h-4 w-4 animate-pulse" />
+                            AI解析中...教材詳細を自動抽出しています
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -357,14 +419,14 @@ const NewMaterialPage: React.FC = () => {
                           className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           <Plus className="h-5 w-5" />
-                          アップロード
+                          動画をアップロード
                         </label>
                         <p className="text-sm text-gray-500 mt-1">
                           最大サイズ: 1GB, 推奨フォーマット: MP4
                         </p>
                         {video && (
                           <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-                            <FileText className="h-4 w-4" />
+                            <Video className="h-4 w-4" />
                             {video.name}
                             <button
                               type="button"
@@ -379,56 +441,83 @@ const NewMaterialPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* PDF Upload */}
+                  {/* Thumbnail Upload */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      教材PDF <span className="text-red-500">*</span>
+                      サムネイル画像
                     </label>
                     <div className="flex items-center gap-4">
-                      <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
-                        {pdf ? (
-                          <FileText className="h-8 w-8 text-blue-600" />
+                      <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                        {thumbnailPreview ? (
+                          <img
+                            src={thumbnailPreview}
+                            alt="Thumbnail preview"
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <FileText className="h-8 w-8 text-gray-400" />
+                          <Upload className="h-8 w-8 text-gray-400" />
                         )}
                       </div>
                       <div>
                         <input
                           type="file"
-                          accept=".pdf"
-                          onChange={handlePdfChange}
+                          accept="image/*"
+                          onChange={handleThumbnailChange}
                           className="hidden"
-                          id="pdf-upload"
-                          required
+                          id="thumbnail-upload"
                         />
                         <label
-                          htmlFor="pdf-upload"
+                          htmlFor="thumbnail-upload"
                           className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           <Plus className="h-5 w-5" />
-                          アップロード
+                          画像をアップロード
                         </label>
                         <p className="text-sm text-gray-500 mt-1">
-                          最大サイズ: 50MB
+                          推奨サイズ: 1280x720px, 最大2MB
                         </p>
-                        {pdf && (
-                          <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-                            <FileText className="h-4 w-4" />
-                            {pdf.name}
-                            <button
-                              type="button"
-                              onClick={() => setPdf(null)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* AI Analysis Results */}
+              {materialDetails && (
+                <div className="p-6 bg-blue-50">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="h-5 w-5 text-blue-600" />
+                    <h3 className="text-lg font-semibold text-blue-900">AI解析結果</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <h4 className="font-medium text-blue-800 mb-2">抽出された学習目標</h4>
+                      <ul className="space-y-1 text-blue-700">
+                        {materialDetails.learningObjectives.slice(0, 3).map((obj, index) => (
+                          <li key={index} className="flex items-start gap-1">
+                            <span className="text-blue-500">•</span>
+                            <span>{obj}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-blue-800 mb-2">準備物</h4>
+                      <ul className="space-y-1 text-blue-700">
+                        {materialDetails.preparationItems.slice(0, 3).map((item, index) => (
+                          <li key={index} className="flex items-start gap-1">
+                            <span className="text-blue-500">•</span>
+                            <span>{item.name}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-600 mt-3">
+                    次のステップで詳細を確認・編集できます
+                  </p>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="p-6 bg-gray-50 rounded-b-xl flex items-center justify-between gap-4">
@@ -452,10 +541,11 @@ const NewMaterialPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleBasicSubmit}
-                    className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={isAnalyzingPDF}
+                    className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300"
                   >
                     <Settings className="h-5 w-5" />
-                    教材詳細を設定
+                    {materialDetails ? '教材詳細を確認・編集' : '教材詳細を設定'}
                   </button>
                 </div>
               </div>
